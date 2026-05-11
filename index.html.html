@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A to Z about たっちゃん — 華金クイズ</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Zen+Maru+Gothic:wght@400;700;900&family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #fde8e8;
+  --pink: #e8637a;
+  --pink-dark: #c04060;
+  --pink-pale: #fff0f2;
+  --pink-mid: #f5b8c4;
+  --gold: #c8953a;
+  --dark: #2a1520;
+  --mid: #7a4055;
+  --muted: #b08090;
+  --white: #ffffff;
+}
+body {
+  font-family: 'Zen Maru Gothic', sans-serif;
+  background: var(--bg);
+  color: var(--dark);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(circle at 20% 20%, #f9c4d088 0%, transparent 45%),
+    radial-gradient(circle at 80% 80%, #ffd6a088 0%, transparent 45%);
+  pointer-events: none; z-index: 0;
+}
+.screen { display: none; position: relative; z-index: 1; }
+.screen.active { display: flex; }
+
+#top {
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  gap: 1.2rem;
+}
+.book-cover {
+  background: var(--pink);
+  border-radius: 18px;
+  padding: 2.2rem 2rem 1.8rem;
+  max-width: 300px;
+  width: 100%;
+  box-shadow: 0 12px 48px rgba(200,80,100,0.28);
+  animation: floatIn 0.8s cubic-bezier(.17,.67,.3,1.1) both;
+  position: relative; overflow: hidden;
+}
+.book-cover::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%);
+  pointer-events: none;
+}
+.script-title {
+  font-family: 'Dancing Script', cursive;
+  font-size: clamp(1.2rem, 5vw, 1.6rem);
+  color: var(--dark);
+  line-height: 1.3;
+  margin-bottom: 0.3rem;
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+.script-sub {
+  font-size: 0.72rem;
+  color: rgba(42,21,32,0.65);
+  letter-spacing: 0.05em;
+  margin-bottom: 1.2rem;
+  font-style: italic;
+}
+.cake-frame {
+  background: rgba(255,255,255,0.25);
+  border-radius: 12px;
+  padding: 1.4rem 1rem;
+  margin-bottom: 1.2rem;
+  font-size: 3.2rem;
+  line-height: 1;
+}
+.cover-name { font-size: 0.85rem; font-weight: 700; color: var(--dark); letter-spacing: 0.12em; }
+.cover-pub { font-size: 0.62rem; color: rgba(42,21,32,0.5); margin-top: 0.2rem; letter-spacing: 0.08em; }
+.page-catch {
+  font-family: 'Shippori Mincho', serif;
+  font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+  color: var(--mid); line-height: 1.8;
+  animation: fadeUp 0.7s ease 0.3s both;
+}
+.dot-row { display: flex; gap: 0.5rem; justify-content: center; animation: fadeUp 0.7s ease 0.4s both; }
+.dot-row span {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--pink);
+  animation: dotpulse 1.8s ease-in-out infinite;
+}
+.dot-row span:nth-child(2) { animation-delay: 0.3s; background: var(--gold); }
+.dot-row span:nth-child(3) { animation-delay: 0.6s; }
+@keyframes dotpulse { 0%,100%{transform:scale(1);opacity:.5} 50%{transform:scale(1.5);opacity:1} }
+.btn-start {
+  background: var(--dark);
+  color: var(--pink-pale);
+  border: none; border-radius: 100px;
+  padding: 1.1rem 3.2rem;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-size: 1rem; font-weight: 900;
+  cursor: pointer; letter-spacing: 0.1em;
+  box-shadow: 0 6px 24px rgba(42,21,32,0.25);
+  transition: transform 0.15s, background 0.2s;
+  animation: fadeUp 0.7s ease 0.5s both;
+}
+.btn-start:hover { transform: translateY(-3px); background: var(--pink-dark); }
+
+#quiz { min-height: 100vh; flex-direction: column; align-items: center; padding: 1.5rem 1rem 3rem; }
+.quiz-inner { width: 100%; max-width: 500px; }
+.q-header { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.4rem; }
+.q-num-label { font-family: 'Dancing Script', cursive; font-size: 1rem; color: var(--pink-dark); white-space: nowrap; min-width: 60px; }
+.prog-wrap { flex: 1; height: 6px; background: var(--pink-mid); border-radius: 100px; overflow: hidden; }
+.prog-bar { height: 100%; background: linear-gradient(90deg, var(--pink-dark), var(--gold)); border-radius: 100px; transition: width 0.5s ease; }
+.score-disp { font-size: 0.75rem; font-weight: 700; color: var(--muted); white-space: nowrap; }
+.alpha-card {
+  background: var(--pink); border-radius: 20px 20px 0 0;
+  padding: 1.4rem 1.8rem 1rem;
+  display: flex; align-items: center; gap: 1.2rem;
+}
+.alpha-big { font-family: 'Dancing Script', cursive; font-size: 3.2rem; color: var(--white); line-height: 1; min-width: 50px; }
+.alpha-word { font-size: 1rem; font-weight: 700; color: var(--white); margin-bottom: 0.1rem; }
+.alpha-hint { font-size: 0.75rem; color: rgba(255,255,255,0.75); font-style: italic; }
+.q-box {
+  background: var(--white); border-radius: 0 0 20px 20px;
+  padding: 1.5rem 1.6rem 1.8rem;
+  box-shadow: 0 6px 28px rgba(200,80,100,0.1);
+  margin-bottom: 1rem;
+}
+.q-text { font-family: 'Shippori Mincho', serif; font-size: clamp(0.95rem, 3.2vw, 1.1rem); font-weight: 700; line-height: 1.8; color: var(--dark); }
+.choices { display: flex; flex-direction: column; gap: 0.65rem; margin-bottom: 1rem; }
+.ch-btn {
+  background: var(--white); border: 2px solid var(--pink-mid); border-radius: 14px;
+  padding: 0.95rem 1.3rem;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-size: 0.92rem; font-weight: 700; color: var(--dark);
+  cursor: pointer; text-align: left;
+  display: flex; align-items: center; gap: 0.8rem;
+  transition: all 0.16s ease;
+}
+.ch-btn:hover:not(:disabled) { border-color: var(--pink); background: var(--pink-pale); transform: translateX(5px); }
+.ch-mark {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--bg); border: 1.5px solid var(--pink-mid);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Dancing Script', cursive; font-size: 1rem; font-weight: 700;
+  color: var(--pink); flex-shrink: 0; transition: all 0.16s;
+}
+.ch-btn:hover:not(:disabled) .ch-mark { background: var(--pink); color: white; border-color: var(--pink); }
+.ch-btn.correct { border-color: #5cb85c; background: #f0faf0; }
+.ch-btn.correct .ch-mark { background: #5cb85c; color: white; border-color: #5cb85c; }
+.ch-btn.wrong { border-color: #e05050; background: #fff0f0; }
+.ch-btn.wrong .ch-mark { background: #e05050; color: white; border-color: #e05050; }
+.ch-btn:disabled { cursor: default; transform: none !important; }
+.exp-box {
+  display: none;
+  background: linear-gradient(135deg, #fff8f0, #fff0f5);
+  border-left: 4px solid var(--gold); border-radius: 0 12px 12px 0;
+  padding: 1rem 1.2rem;
+  font-size: 0.87rem; color: var(--mid); line-height: 1.75;
+  margin-bottom: 0.8rem;
+}
+.exp-box.show { display: block; }
+.exp-label { font-size: 0.72rem; font-weight: 900; color: var(--gold); letter-spacing: 0.08em; margin-bottom: 0.3rem; }
+.video-link {
+  display: none;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--white);
+  border: 2px solid var(--pink-mid);
+  border-radius: 12px;
+  padding: 0.75rem 1.1rem;
+  margin-bottom: 1rem;
+  text-decoration: none;
+  color: var(--pink-dark);
+  font-size: 0.88rem;
+  font-weight: 700;
+  transition: all 0.16s;
+}
+.video-link.show { display: flex; }
+.video-link:hover { background: var(--pink-pale); border-color: var(--pink); transform: translateY(-1px); }
+.video-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: #ff0000;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.video-icon svg { width: 16px; height: 16px; fill: white; }
+.video-txt { flex: 1; }
+.video-txt-main { font-size: 0.88rem; font-weight: 700; color: var(--pink-dark); }
+.video-txt-sub { font-size: 0.7rem; color: var(--muted); margin-top: 1px; }
+.video-arrow { font-size: 0.9rem; color: var(--muted); }
+.btn-next {
+  display: none; width: 100%;
+  background: var(--dark); color: var(--pink-pale);
+  border: none; border-radius: 14px; padding: 1rem;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-size: 0.98rem; font-weight: 900; cursor: pointer;
+  letter-spacing: 0.06em; transition: transform 0.15s, background 0.15s;
+}
+.btn-next.show { display: block; }
+.btn-next:hover { transform: translateY(-2px); background: var(--pink-dark); }
+
+#result { min-height: 100vh; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 1.5rem; text-align: center; gap: 1rem; }
+.result-icon { font-size: 4rem; animation: pop 0.6s cubic-bezier(.17,.67,.3,1.4) both; display: block; }
+@keyframes pop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+.result-script { font-family: 'Dancing Script', cursive; font-size: clamp(2rem, 8vw, 3rem); color: var(--pink-dark); }
+.result-card {
+  background: var(--white); border-radius: 24px; padding: 2rem;
+  max-width: 400px; width: 100%;
+  box-shadow: 0 8px 40px rgba(200,80,100,0.15); border: 1.5px solid var(--pink-mid);
+}
+.score-huge { font-family: 'Dancing Script', cursive; font-size: 5rem; color: var(--pink); line-height: 1; }
+.score-denom { font-size: 1.1rem; color: var(--muted); margin-bottom: 0.3rem; }
+.rank-txt { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.8rem; }
+.star-row { font-size: 1.5rem; margin-bottom: 1.2rem; }
+.bday-card {
+  background: var(--pink); border-radius: 14px; padding: 1.3rem 1.4rem;
+  font-family: 'Shippori Mincho', serif; font-size: 0.9rem; line-height: 2;
+  color: var(--white); margin-bottom: 1.2rem; white-space: pre-line;
+}
+.btn-retry {
+  background: transparent; border: 2px solid var(--dark); color: var(--dark);
+  border-radius: 100px; padding: 0.85rem 2.4rem;
+  font-family: 'Zen Maru Gothic', sans-serif; font-size: 0.9rem; font-weight: 700;
+  cursor: pointer; transition: all 0.18s;
+}
+.btn-retry:hover { background: var(--dark); color: var(--pink-pale); }
+@keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+@keyframes floatIn { from{opacity:0;transform:translateY(30px) scale(0.95)} to{opacity:1;transform:translateY(0) scale(1)} }
+</style>
+</head>
+<body>
+
+<!-- TOP -->
+<div class="screen active" id="top">
+  <div class="book-cover">
+    <div class="script-title">A to Z<br>about たっちゃん</div>
+    <div class="script-sub">You jump, I jump — Hanakin Couple</div>
+    <div class="cake-frame">🎂</div>
+    <div class="cover-name">華金カップル</div>
+    <div class="cover-pub">KODANSHA</div>
+  </div>
+  <p class="page-catch">たつやのことを<br>どれだけ知ってる？</p>
+  <div class="dot-row"><span></span><span></span><span></span></div>
+  <button class="btn-start" onclick="startQuiz()">クイズスタート 🎉</button>
+</div>
+
+<!-- QUIZ -->
+<div class="screen" id="quiz">
+  <div class="quiz-inner">
+    <div class="q-header">
+      <span class="q-num-label" id="qLabel">Q1 / 26</span>
+      <div class="prog-wrap"><div class="prog-bar" id="progBar" style="width:0%"></div></div>
+      <span class="score-disp" id="scoreTxt">✨ 0点</span>
+    </div>
+    <div class="alpha-card">
+      <div class="alpha-big" id="alphaLetter">A</div>
+      <div>
+        <div class="alpha-word" id="alphaWord">Animal</div>
+        <div class="alpha-hint" id="alphaHint">動物について</div>
+      </div>
+    </div>
+    <div class="q-box">
+      <p class="q-text" id="qText">問題文</p>
+    </div>
+    <div class="choices" id="choices"></div>
+    <div class="exp-box" id="expBox">
+      <div class="exp-label">📖 ANSWER</div>
+      <div id="expText"></div>
+    </div>
+    <a class="video-link" id="videoLink" target="_blank" rel="noopener">
+      <div class="video-icon">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </div>
+      <div class="video-txt">
+        <div class="video-txt-main">動画はこちら 🎬</div>
+        <div class="video-txt-sub">YouTubeで確認する</div>
+      </div>
+      <span class="video-arrow">→</span>
+    </a>
+    <button class="btn-next" id="btnNext" onclick="nextQ()">次の問題へ →</button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="result">
+  <span class="result-icon" id="resultIcon" style="display:none"></span>
+  <div class="result-script" id="resultScript">You did it!</div>
+  <div class="result-card">
+    <div class="score-huge" id="scoreHuge">0</div>
+    <div class="score-denom" id="scoreDenom">/ 26問</div>
+    <div class="rank-txt" id="rankTxt" style="display:none"></div>
+    <div class="star-row" id="starRow">⭐⭐⭐</div>
+    <div class="bday-card" id="bdayMsg"></div>
+  </div>
+  <button class="btn-retry" onclick="restart()">もう一度挑戦する 🔄</button>
+</div>
+
+<script>
+// 正解位置をシャッフルする関数
+function makeChoices(correct, wrongs) {
+  // 全選択肢をランダムに並べて正解インデックスを返す
+  var all = wrongs.slice();
+  var pos = Math.floor(Math.random() * 4);
+  all.splice(pos, 0, correct);
+  return { choices: all, ans: pos };
+}
+
+// 元データ（正解と不正解を分けて定義）
+var RAW = [
+  {
+    letter:"A", word:"Animal", hint:"動物について",
+    q:"恋人最後のデートで行った動物園での2ショット！たっちゃんと顔がそっくりだった動物は？",
+    correct:"クマ", wrongs:["ゴリラ","カバ","カピバラ"],
+    exp:"正解はクマ！たっちゃんとそっくりだったみたい🐻",
+    url:"https://youtu.be/UHc8uvzMcvg?si=534J35Vj97cPARn_"
+  },
+  {
+    letter:"B", word:"Birthday", hint:"誕生日について",
+    q:"沖縄で迎えたたっちゃん25歳のお誕生日。りこちゃん手作りケーキのプレートに書かれていた言葉は？",
+    correct:"さきしぬな", wrongs:["25さいおめでとう","りこだけみろ","ずっといっしょ"],
+    exp:"正解は「さきしぬな」！りこちゃんらしいメッセージ😂🎂",
+    url:"https://youtu.be/EjdFcaNUIjk?si=9Cy9zUxM363DMLmW"
+  },
+  {
+    letter:"C", word:"Car", hint:"ドライブについて",
+    q:"幸子ラスト動画で思い出を1つずつ挙げたとき、たっちゃんが言ったものは？",
+    correct:"帰りたくないりこちゃんとの「もうちょいドライブしよ」のドライブ",
+    wrongs:["りこちゃんとのカラオケ大会ドライブ","ドライブスルーで食べたハンバーガー","隣でりこちゃんが爆睡してるドライブ"],
+    exp:"「もうちょいドライブしよ」のドライブが思い出なんだね🚗💕",
+    url:"https://youtu.be/lkt-PVPsjEM?si=K1lTiJ6jAoXiXdRF"
+  },
+  {
+    letter:"D", word:"Date", hint:"デートについて",
+    q:"「デートの約束したけど…特にしたいことがない1日密着vlog」でたっちゃんが今度したいと言っていたデートは？",
+    correct:"ドライブスルー巡りデート",
+    wrongs:["焼き鳥屋さん巡りデート","コンビニ巡りデート","バーガーキング巡りデート"],
+    exp:"ドライブスルー巡りデート！たっちゃんらしいアイデア🍔",
+    url:"https://youtu.be/TSOJuGzughs?si=GMCBan5ToL8-FslD"
+  },
+  {
+    letter:"E", word:"Eat", hint:"食べることについて",
+    q:"月見バーガーを爆食する動画でたっちゃんはハンバーガーを何個食べたでしょう？",
+    correct:"5個", wrongs:["4個","6個","3個"],
+    exp:"5個！！食べすぎやろ😂🍔",
+    url:"https://youtu.be/c-QH9FI5S4o?si=ATc7H4eQNYonyd75"
+  },
+  {
+    letter:"F", word:"Fight", hint:"喧嘩について",
+    q:"華金カップル初めての喧嘩の動画で、りこちゃんと仲直りしたいたっちゃんは何をプレゼントしたでしょう？",
+    correct:"Francfrancのエプロン", wrongs:["ジェラピケのルームウェア","スタバのタンブラー","お花と手紙"],
+    exp:"Francfrancのエプロン！センス良い仲直りプレゼント🌸",
+    url:"https://youtu.be/TS3RKyESQCY?si=yw36Rsdt1FUWS51H"
+  },
+  {
+    letter:"G", word:"Goal performance", hint:"ゴールパフォーマンスについて",
+    q:"REVENGER'S vs 東京ヴェルディeスポーツシブヤの戦いでたつやがりこちゃんに向けてしたパフォーマンスは？",
+    correct:"プロポーズパフォーマンス", wrongs:["ハート連打パフォーマンス","投げキッスパフォーマンス","土下座パフォーマンス"],
+    exp:"プロポーズパフォーマンス！ロマンチックすぎる💍⚽",
+    url:"https://youtu.be/eJxJin7eYCw?si=coj21w6gdpoJM-Z6"
+  },
+  {
+    letter:"H", word:"Honeymoon", hint:"ハネムーンについて",
+    q:"モルディブのプールでふたりが身体で作った言葉は？",
+    correct:"LOVE", wrongs:["HANAKIN","HIRAI","FAMILY"],
+    exp:"LOVE！ふたりらしい素敵なショット🏊💕",
+    url:"https://youtu.be/VrulW8P-u04?si=95hL-dKm_1U9c49d"
+  },
+  {
+    letter:"I", word:"Ice cream", hint:"アイスクリームについて",
+    q:"入籍した日に2人で食べたサーティワン、たっちゃんは人生で何回目？",
+    correct:"3回目", wrongs:["10回目","1回目","7回目"],
+    exp:"3回目！ほぼ食べたことなかったんだね🍦",
+    url:"https://youtu.be/CkKUI7bH6-A?si=kFBTcZQLJM3RQ8qM"
+  },
+  {
+    letter:"J", word:"January", hint:"1月について",
+    q:"2026年1月の旅行前にたっちゃんが考えた行き先の決め方は？",
+    correct:"お手製のガチャガチャ", wrongs:["あみだくじ","目隠しをしたりこちゃんに日本地図で指さしてもらう","6つにしぼってサイコロ回してもらう"],
+    exp:"お手製のガチャガチャ！手作り感がかわいい🎰",
+    url:"https://youtu.be/KdeZ_q3-4AA?si=n6DMVHYT_brH-myB"
+  },
+  {
+    letter:"K", word:"Korea", hint:"韓国について",
+    q:"「韓国ノープランデートが楽しすぎたゼ」の動画の序盤でたっちゃんが朝食で食べてたものは？（超並んで手に入れたやつ！）",
+    correct:"ロンドンベーグルミュージアムのベーグル", wrongs:["サブウェイのサンドウィッチ","おにぎり","ソルロンタン"],
+    exp:"ロンドンベーグルミュージアムのベーグル！並んで食べる価値あり🥯",
+    url:"https://youtu.be/uxJSE3eYIvY?si=XoVi_e0RZxQvKETd"
+  },
+  {
+    letter:"L", word:"Las Vegas", hint:"ラスベガスについて",
+    q:"ラスベガス旅行2日目のディナーで、たっちゃんは何をして店員さんを困らせちゃった？",
+    correct:"骨付き肉にかぶりついて噛みきれなかった", wrongs:["注文時に日本語ばかり使った","シェフを呼んでと言った","突然踊り出した"],
+    exp:"骨付き肉にかぶりついて格闘！たっちゃんらしすぎる😂🥩",
+    url:"https://youtu.be/Pqs-bmG8rpE?si=9gAULYUtMekt2fBQ"
+  },
+  {
+    letter:"M", word:"Money", hint:"お金について",
+    q:"結婚資金で貯めてた500円貯金、たっちゃんはいくら貯めたでしょう？",
+    correct:"24,500円", wrongs:["500円","17,500円","50,200円"],
+    exp:"24,500円！500円玉コツコツ貯めたんだね🪙",
+    url:"https://youtu.be/bEb0Vd-ySGU?si=j8WMfZp5XFIyksDT"
+  },
+  {
+    letter:"N", word:"Nagashi Somen", hint:"流しそうめんについて",
+    q:"初代華金ハウスでの流しそうめん動画でそうめん以外のものを流しました。たっちゃんが流したもの（キウイ・梅干し以外）はなんでしょう？",
+    correct:"キャンディーチーズ", wrongs:["スイカ","たつやシェフのスクランブルエッグ","焼き鳥"],
+    exp:"キャンディーチーズ！謎のチョイスすぎる😂🧀",
+    url:"https://youtu.be/4Y7R0QvXuMY?si=I7W1MFqhxOJYFMGl"
+  },
+  {
+    letter:"O", word:"Otoko", hint:"たっちゃん1人時間について",
+    q:"2026年1月のたっちゃんの1人時間動画で、オムライスに何と書きましたか？（最後の文字は半熟卵で流れたよ！）",
+    correct:"ひとりイヤ", wrongs:["漢ひとり","たつこ作♡","りこ大スキ"],
+    exp:"「ひとりイヤ」！りこちゃんがいないと寂しいんだね🥺🍳",
+    url:"https://youtu.be/UHNbVBsKvvg?si=9CMeojVcVcC1C85D"
+  },
+  {
+    letter:"P", word:"Propose", hint:"プロポーズについて",
+    q:"たっちゃんがりこちゃんにプロポーズをしたラスベガスの映画館で頼んだドリンク2つは？",
+    correct:"コーラとスプライト", wrongs:["ファンタメロンと水","ペプシとアイスコーヒー","ラムネとウーロン茶"],
+    exp:"コーラとスプライト！緊張しながら選んだのかな💍🥤",
+    url:"https://youtu.be/5LNsmw8H2QY?si=4YPaTu0QhdqBM3HE"
+  },
+  {
+    letter:"Q", word:"Question", hint:"質問コーナーについて",
+    q:"2020年第1回泥酔質問コーナーで「仲良しの秘訣」を聞かれたたっちゃん、一番最初に何と答えたでしょう？",
+    correct:"どんな時も全力", wrongs:["毎日ちゃんと話す","お互いを尊重する","感謝を忘れない"],
+    exp:"「どんな時も全力」！たっちゃんらしい答えだね🔥",
+    url:"https://youtu.be/baHxwZz2MBk?si=FVVmmQmDyxml_q1P"
+  },
+  {
+    letter:"R", word:"Room", hint:"お部屋について",
+    q:"3代目華金ハウスのルームツアーでたっちゃんがお風呂を紹介！1番嬉しいポイントは何？",
+    correct:"追いだき", wrongs:["シャワー","照明の明るさ","ドアが開けやすい"],
+    exp:"追いだき！生活感あるこだわりポイント🛁",
+    url:"https://youtu.be/HapsX9nQ8mA?si=PUj3Fj8l1T7v869R"
+  },
+  {
+    letter:"S", word:"Sunday", hint:"日曜日について",
+    q:"たっちゃんが初めて日曜リールを投稿した日は？",
+    correct:"2025年7月2日", wrongs:["2025年6月29日","2025年8月5日","2025年8月22日"],
+    exp:"2025年7月2日！日曜リールの始まりの日📅",
+    url:"https://www.instagram.com/reel/DLmmtrlzrdh/?igsh=MWZjYmNpdmh5ZjVxcg=="
+  },
+  {
+    letter:"T", word:"Tatsuya no nichiyobi", hint:"たつやの日曜日について",
+    q:"「たつやの日曜日」の動画の中で1番コメント数が多い動画はどれでしょう？",
+    correct:"仙台弾丸1泊2日の旅、俺顔でかぁ",
+    wrongs:["3000個のプレゼント一気に開封します。","【終。】我が家は今日も平和です","平井家の日常。"],
+    exp:"「仙台弾丸1泊2日の旅、俺顔でかぁ」！コメントしまくったファン多数😂",
+    url:null
+  },
+  {
+    letter:"U", word:"Udon", hint:"うどんについて",
+    q:"「本場うどん巡りデート」の動画で食後に車で寝てしまったりこちゃん。そのときたっちゃんが連れて行った2人の思い出の場所は？",
+    correct:"登録者数5万人記念で行った海",
+    wrongs:["初めて2人で行ったラーメン屋さん","りこちゃんの好きな神社","登録者数3万人記念で行った山"],
+    exp:"登録者数5万人記念で行った海！思い出の場所に連れて行くたっちゃん🌊",
+    url:"https://youtu.be/1s367S1xsZg?si=-Ar3sSon3Jrc3Ens"
+  },
+  {
+    letter:"V", word:"Vacation", hint:"旅行・沖縄について",
+    q:"出来立てのサーターアンダギーを食べたたっちゃんの最初の一言は？",
+    correct:"うまいさ〜！！", wrongs:["え、これ無限やん！","ちょ、誰も取らんといて！","沖縄住もかな！"],
+    exp:"「うまいさ〜！！」！沖縄な感じが出てる🍩",
+    url:"https://youtu.be/7UKTZAYqrEE?si=6s8f6hJ_nJOL5XVR"
+  },
+  {
+    letter:"W", word:"Wow", hint:"サプライズについて",
+    q:"東京出張のたっちゃんにりこちゃんがドッキリで会いに行ったときのたっちゃんの第一声は？",
+    correct:"どういうこと？", wrongs:["いやいやいや（笑）","え、来たん！？","ちょっと待ってや！"],
+    exp:"「どういうこと？」！完全に驚いてるたっちゃん😂",
+    url:"https://youtu.be/rShy172FxN4?si=TBS5VsRqAwC10jxV"
+  },
+  {
+    letter:"X", word:"Xmas", hint:"クリスマスについて",
+    q:"2023年のクリスマスパーティーの支度中、たつこ子に襲いかかったハプニングは？",
+    correct:"ランニングマシン(重量物)が届いた",
+    wrongs:["プレゼントの隠し場所がバレた","サンタコスのチャックが壊れた","シャンパンをこぼした"],
+    exp:"ランニングマシンが届いた！タイミング悪すぎる😂🎄",
+    url:"https://youtu.be/s_i29P46tyM?si=F9E07Rrlg2wb4Aq7"
+  },
+  {
+    letter:"Y", word:"Yohukashi", hint:"夜更かしについて",
+    q:"ドン・キホーテで予算1,000円のプレゼントチャレンジ！たつやがりこちゃんにあげたもの（落書き顔ペン・すみっコぐらしキーホルダー以外）はなんでしょう？",
+    correct:"そうめん", wrongs:["ハンドクリーム","たこ焼きの粉","靴下"],
+    exp:"そうめん！謎チョイスすぎて逆にかわいい😂🍜",
+    url:"https://youtu.be/54wgd6f-N6E?si=Vy73i-4B-Jls6OWB"
+  },
+  {
+    letter:"Z", word:"ZZZ", hint:"睡眠について",
+    q:"限界を迎えて寝倒した日、りこちゃんは合計何時間寝たか？",
+    correct:"25時間", wrongs:["18時間","30時間","24時間"],
+    exp:"25時間！！1日以上寝てる😂💤",
+    url:"https://youtu.be/pH51qtiMaCs?si=ohacEjmPg4kFWc1l"
+  },
+];
+
+// 選択肢をシャッフルしてQUIZZESを生成
+var QUIZZES = RAW.map(function(r) {
+  var all = r.wrongs.slice();
+  var pos = Math.floor(Math.random() * 4);
+  all.splice(pos, 0, r.correct);
+  return {
+    letter: r.letter, word: r.word, hint: r.hint,
+    q: r.q, choices: all, ans: pos,
+    exp: r.exp, url: r.url
+  };
+});
+
+const BDAY_MSG = "たっちゃん\nお誕生日おめでとうございます🎂\n\nいつも動画に元気をもらっています！\nこれからもずっと応援しています🤍\nHappy Birthday!!";
+
+var current = 0, score = 0;
+var total = QUIZZES.length;
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+function startQuiz() { current = 0; score = 0; show('quiz'); loadQ(); }
+function loadQ() {
+  var d = QUIZZES[current];
+  document.getElementById('qLabel').textContent = 'Q' + (current+1) + ' / ' + total;
+  document.getElementById('progBar').style.width = (current / total * 100) + '%';
+  document.getElementById('scoreTxt').textContent = '✨ ' + score + '点';
+  document.getElementById('alphaLetter').textContent = d.letter;
+  document.getElementById('alphaWord').textContent = d.word;
+  document.getElementById('alphaHint').textContent = d.hint;
+  document.getElementById('qText').textContent = d.q;
+  document.getElementById('expBox').classList.remove('show');
+  document.getElementById('expText').textContent = '';
+  document.getElementById('btnNext').classList.remove('show');
+  document.getElementById('videoLink').classList.remove('show');
+  var el = document.getElementById('choices');
+  el.innerHTML = '';
+  ['A','B','C','D'].forEach(function(m, i) {
+    var btn = document.createElement('button');
+    btn.className = 'ch-btn';
+    btn.innerHTML = '<span class="ch-mark">' + m + '</span>' + d.choices[i];
+    btn.onclick = function(){ selectAnswer(i); };
+    el.appendChild(btn);
+  });
+}
+function selectAnswer(idx) {
+  var d = QUIZZES[current];
+  document.querySelectorAll('.ch-btn').forEach(function(b, i) {
+    b.disabled = true;
+    if (i === d.ans) b.classList.add('correct');
+    else if (i === idx) b.classList.add('wrong');
+  });
+  if (idx === d.ans) score++;
+  document.getElementById('expText').textContent = d.exp;
+  document.getElementById('expBox').classList.add('show');
+  document.getElementById('btnNext').classList.add('show');
+  document.getElementById('scoreTxt').textContent = '✨ ' + score + '点';
+  var vl = document.getElementById('videoLink');
+  if (d.url) {
+    vl.href = d.url;
+    var isInsta = d.url.indexOf('instagram') !== -1;
+    vl.querySelector('.video-txt-main').textContent = isInsta ? '投稿はこちら 📸' : '動画はこちら 🎬';
+    vl.querySelector('.video-txt-sub').textContent = isInsta ? 'Instagramで確認する' : 'YouTubeで確認する';
+    vl.querySelector('.video-icon').style.background = isInsta ? '#e1306c' : '#ff0000';
+    vl.classList.add('show');
+  }
+}
+function nextQ() {
+  current++;
+  if (current >= total) showResult(); else loadQ();
+}
+function showResult() {
+  show('result');
+  var pct = score / total;
+  var emoji, msg, rank, stars;
+  emoji=''; msg='クイズはここまでだよ！お疲れ様！！'; rank=''; stars='';
+  document.getElementById('resultIcon').textContent = emoji;
+  document.getElementById('resultScript').textContent = msg;
+  document.getElementById('scoreHuge').textContent = score;
+  document.getElementById('scoreDenom').textContent = '/ ' + total + '問';
+  document.getElementById('rankTxt').textContent = rank;
+  document.getElementById('starRow').textContent = stars;
+  document.getElementById('bdayMsg').textContent = BDAY_MSG;
+}
+function restart() { current = 0; score = 0; show('top'); }
+</script>
+</body>
+</html>
